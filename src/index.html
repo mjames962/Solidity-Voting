@@ -40,7 +40,7 @@
               </tbody>
             </table>
             <hr/>
-            <form onSubmit="App.castVote(); return false;">
+            <form id="inputForm" onSubmit="App.castVote(); return false;">
               <div class="form-group">
                 <label for="candidatesSelect">Select Candidate</label>
                 <select class="form-control" id="candidatesSelect">
@@ -50,6 +50,14 @@
               <hr />
             </form>
             <p id="accountAddress" class="text-center"></p>
+          </div>
+          <div id="ownerForm">
+            <form onSubmit="App.makeEligible(); return false;">
+                <label for="eligible">Give Voting Permissions to an Address:</label>
+                <input type="text" id="eligible" name="eligible">
+                </textarea>
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
           </div>
         </div>
       </div>

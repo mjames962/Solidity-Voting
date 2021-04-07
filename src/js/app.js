@@ -44,7 +44,7 @@ App = {
       // https://github.com/MetaMask/metamask-extension/issues/2393
       instance.votedEvent({}, {
         fromBlock: 'latest'
-      //  toBlock: 'latest'
+        //toBlock: 'latest'
       }).watch(function(error, event) {
         console.log("event triggered", event)
         // Reload when a new vote is recorded
@@ -65,7 +65,7 @@ App = {
     web3.eth.getCoinbase(function(err, account) {
       if (err === null) {
         App.account = account;
-        $("#accountAddress").html("Your Account: " + account);
+        $("#accountAddress").html("Your Public Key: " + account);
       }
     });
 
@@ -99,12 +99,26 @@ App = {
     }).then(function(hasVoted) {
       // Do not allow a user to vote
       if(hasVoted) {
-        $('form').hide();
+        $('#inputForm').hide();
       }
+
       loader.hide();
       content.show();
+
     }).catch(function(error) {
       console.warn(error);
+    });
+  },
+
+  makeEligible: function() {
+    var address = $('#eligible').val();
+    App.contracts.Election.deployed().then(function(instance) {
+      return instance.giveVoterRights(address, { from: App.account });
+    }).then(function(result) {
+      $("#content").hide();
+      $("#loader").show();
+    }).catch(function(err) {
+      console.error(err);
     });
   },
 
@@ -121,6 +135,7 @@ App = {
     });
   }
 };
+
 
 $(function() {
   $(window).load(function() {
