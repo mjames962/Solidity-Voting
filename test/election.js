@@ -28,10 +28,34 @@ contract ("Election", function(accounts){
     });
   });
 
+  it("allows only owner to whitelist voters", function() {
+    return Election.deployed().then(function(instance) {
+      electionInstance = instance;
+      candidateId = 1;
+      return electionInstance.giveVoterRights(accounts[1], { from: accounts[0] });
+    }).then(function(receipt) {
+      assert.equal(receipt.logs.length, 1, "an event was triggered");
+      assert.equal(receipt.logs[0].event, "whiteListEvent", "the event type is correct");
+      assert.equal(receipt.logs[0].args.voter, accounts[1], "the account is correct");
+
+      return electionInstance.eligible(accounts[1]);
+    }).then(function(canVote1) {
+      assert.equal(canVote1, true, "account permissions logged");
+
+      return electionInstance.giveVoterRights(accounts[0], { from: accounts[1] });
+    }).then(assert.fail).catch(function(error) {
+      assert(error.message.indexOf('revert') >= 0, "error message must contain revert");
+      return electionInstance.eligible(accounts[0]);
+    }).then(function(canVote0) {
+      assert.equal(canVote0, false, "only the owner can set permissions");
+    })
+  });
+
   it("allows a voter to cast a vote", function() {
     return Election.deployed().then(function(instance) {
       electionInstance = instance;
       candidateId = 1;
+      electionInstance.giveVoterRights(accounts[0], { from: accounts[0] })
       return electionInstance.vote(candidateId, { from: accounts[0] });
     }).then(function(receipt) {
       assert.equal(receipt.logs.length, 1, "an event was triggered");
