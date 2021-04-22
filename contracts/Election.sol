@@ -21,6 +21,10 @@ contract Election {
         uint indexed _candidateID
     );
 
+    event whiteListEvent(
+        address indexed voter
+    );
+
 
   constructor() public {
     owner = msg.sender;
@@ -47,13 +51,14 @@ contract Election {
       "This address has already voted."
     );
 
-    totalEligable ++;
+    totalEligable = safeAdd(totalEligable, 1);
     eligible[voter] = true;
+    emit whiteListEvent(voter);
   }
 
 
   function createCandidate(string memory _name) private {
-    totalCandidates ++;
+    totalCandidates = safeAdd(totalCandidates, 1);
     candidates[totalCandidates] = Candidate(totalCandidates, _name, 0);
   }
 
@@ -63,9 +68,15 @@ contract Election {
     require(_candidateID > 0 && _candidateID <= totalCandidates);
 
     voted[msg.sender] = true;
-    candidates[_candidateID].totalVotes ++;
+    candidates[_candidateID].totalVotes = safeAdd(candidates[_candidateID].totalVotes, 1);
 
     emit votedEvent(_candidateID);
 
+  }
+
+  function safeAdd(uint256 a, uint256 b) internal pure returns (uint256 c) {
+    c = a + b;
+    require(c >= a);
+    return c;
   }
 }
