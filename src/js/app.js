@@ -10,7 +10,7 @@ App = {
 
   initWeb3: async function() {
       await ethereum.enable();
-    // TODO: refactor conditional
+
     if (typeof web3 !== 'undefined') {
       // If a web3 instance is already provided by Meta Mask.
       App.web3Provider = web3.currentProvider;
@@ -25,7 +25,7 @@ App = {
 
   initContract: function() {
     $.getJSON("Election.json", function(election) {
-      // Instantiate a new truffle contract from the artifact
+
       App.contracts.Election = TruffleContract(election);
       // Connect provider to interact with contract
       App.contracts.Election.setProvider(App.web3Provider);
@@ -39,15 +39,10 @@ App = {
   // Listen for events emitted from the contract
   listenForEvents: function() {
     App.contracts.Election.deployed().then(function(instance) {
-      // Restart Chrome if you are unable to receive this event
-      // This is a known issue with Metamask
-      // https://github.com/MetaMask/metamask-extension/issues/2393
       instance.votedEvent({}, {
         fromBlock: 'latest'
-        //toBlock: 'latest'
       }).watch(function(error, event) {
         console.log("event triggered", event)
-        // Reload when a new vote is recorded
         App.render();
       });
     });
@@ -105,6 +100,12 @@ App = {
       loader.hide();
       content.show();
 
+      return electionInstance.owner();
+    }).then(function(ownerAddress) {
+      //only show admin interface to owner
+      if(App.account !== ownerAddress) {
+        $('#ownerForm').hide();
+      }
     }).catch(function(error) {
       console.warn(error);
     });
