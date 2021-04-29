@@ -76,7 +76,7 @@ contract Election {
 
   function safeAdd(uint256 a, uint256 b) internal pure returns (uint256 c) {
     c = a + b;
-    require(c >= a);
+    require(c >= a, "Overflow will occur as a result of this operation");
     return c;
   }
 }
